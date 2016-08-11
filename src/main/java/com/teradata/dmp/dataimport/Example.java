@@ -1,6 +1,11 @@
 package com.teradata.dmp.dataimport;
 
 import com.google.gson.JsonObject;
+import com.teradata.dmp.dataimport.client.Client;
+import com.teradata.dmp.dataimport.config.Config;
+import com.teradata.dmp.dataimport.config.IConfig;
+import com.teradata.dmp.dataimport.request.IRequest;
+import com.teradata.dmp.dataimport.request.Request;
 
 /**
  * Example
@@ -10,12 +15,11 @@ import com.google.gson.JsonObject;
 public class Example {
 
     public static void main(String args[]) {
-        Client client = new Client("go.flx1.com");
-        client.setScheme("https");
-        client.setPath("/dp");
+        IConfig config = Config.getDefault();
+        Client client = new Client(config);
 
         for (int i = 0; i < 10; i++) {
-            Request request = new Request();
+            IRequest request = new Request("/dp");
 
             // Default properties
             request.set(Dimensions.PIXEL_ID, "1");

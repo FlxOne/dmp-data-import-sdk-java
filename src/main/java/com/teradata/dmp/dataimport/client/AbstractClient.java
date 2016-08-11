@@ -1,6 +1,10 @@
-package com.teradata.dmp.dataimport;
+package com.teradata.dmp.dataimport.client;
 
 import com.google.gson.Gson;
+import com.teradata.dmp.dataimport.Dimensions;
+
+import com.teradata.dmp.dataimport.config.IConfig;
+import com.teradata.dmp.dataimport.request.IRequest;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
@@ -19,11 +23,11 @@ import org.asynchttpclient.DefaultAsyncHttpClientConfig;
 import org.asynchttpclient.Response;
 
 /**
- * Client
+ * Abstract Client
  *
  * @author Teradata
  */
-public class Client {
+public abstract class AbstractClient implements IClient {
 
     private final URIBuilder builder = new URIBuilder();
     private final DefaultAsyncHttpClient asyncHttpClient;
@@ -32,9 +36,11 @@ public class Client {
     private final Random random;
     private final CompletableFuture<ArrayList<String>> future = new CompletableFuture<>();
 
-    public Client(String host) {
-        this.host = host;
+    public AbstractClient(IConfig config) {
+        this.host = config.getHost();
         this.random = new Random();
+
+        builder.setScheme(config.getScheme());
 
         DefaultAsyncHttpClientConfig.Builder configBuilder = new DefaultAsyncHttpClientConfig.Builder();
         configBuilder.setKeepAlive(true);
@@ -51,6 +57,7 @@ public class Client {
         }, 0, 1000);
     }
 
+    @Override
     public ArrayList<String> getHostAddresses() {
         ArrayList<String> hostAddresses = new ArrayList<>();
 
@@ -65,15 +72,8 @@ public class Client {
         return hostAddresses;
     }
 
-    public void setScheme(String scheme) {
-        builder.setScheme(scheme);
-    }
-
-    public void setPath(String path) {
-        builder.setPath(path);
-    }
-
-    public void execute(Request request) {
+    @Override
+    public void execute(IRequest request) {
         future.whenComplete((hostAddresses, unusedButRequired) -> {
             if (request.getAttempts() >= 3) {
                 System.out.println("Max attempts reached");
@@ -94,6 +94,10 @@ public class Client {
                     }
                 }
 
+                // Set path
+                builder.setPath(request.getPath());
+
+                // Clear
                 builder.clearParameters();
 
                 // Round-robin
