@@ -44,7 +44,6 @@ public abstract class AbstractClient implements IClient {
 
         DefaultAsyncHttpClientConfig.Builder configBuilder = new DefaultAsyncHttpClientConfig.Builder();
         configBuilder.setKeepAlive(true);
-        configBuilder.setAcceptAnyCertificate(true);
 
         AsyncHttpClientConfig asyncHttpClientConfig = configBuilder.build();
         this.asyncHttpClient = new DefaultAsyncHttpClient(asyncHttpClientConfig);
